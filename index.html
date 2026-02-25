@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web制作 見積もりシミュレーター</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- ヘッダー -->
+    <header class="header">
+      <div class="header-inner">
+        <h1 class="header-title">Web制作 見積もりシミュレーター</h1>
+        <p class="header-subtitle">選択するだけで概算金額を即座に計算</p>
+      </div>
+    </header>
+
+    <!-- 見積もり合計バー -->
+    <div class="total-bar">
+      <div class="total-bar-inner">
+        <div class="total-main">
+          <span class="total-label">概算見積もり金額</span>
+          <span class="total-amount" id="totalAmount">¥0</span>
+        </div>
+        <div class="total-sub">
+          <span class="total-tax" id="totalTax">税込: ¥0</span>
+          <span class="total-pages" id="totalPages">総ページ数: 0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ステップナビゲーション -->
+    <div class="step-nav">
+      <div class="step-nav-inner">
+        <button class="step-nav-item active" data-step="1">
+          <span class="step-num">1</span>
+          <span class="step-text">サイト種別</span>
+        </button>
+        <button class="step-nav-item" data-step="2">
+          <span class="step-num">2</span>
+          <span class="step-text">ページ構成</span>
+        </button>
+        <button class="step-nav-item" data-step="3">
+          <span class="step-num">3</span>
+          <span class="step-text">機能・エフェクト</span>
+        </button>
+        <button class="step-nav-item" data-step="4">
+          <span class="step-num">4</span>
+          <span class="step-text">システム・設定</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <main class="main">
+      <!-- Step 1: サイト種別選択 -->
+      <section class="step-panel active" id="step1">
+        <div class="step-header">
+          <h2 class="step-title">Step 1</h2>
+          <p class="step-description">制作するサイトの種別を選択してください</p>
+        </div>
+        <div class="card-grid" id="siteTypeGrid">
+          <label class="type-card">
+            <input type="radio" name="siteType" value="lp" data-price="70000">
+            <div class="type-card-inner">
+              <div class="type-icon">&#x1F4C4;</div>
+              <h3 class="type-name">ランディングページ</h3>
+              <p class="type-desc">1ページ完結型のLP制作</p>
+              <span class="type-price">¥70,000〜</span>
+            </div>
+          </label>
+          <label class="type-card">
+            <input type="radio" name="siteType" value="corporate" data-price="65000">
+            <div class="type-card-inner">
+              <div class="type-icon">&#x1F3E2;</div>
+              <h3 class="type-name">コーポレートサイト</h3>
+              <p class="type-desc">企業の情報発信サイト</p>
+              <span class="type-price">¥65,000〜/ページ</span>
+            </div>
+          </label>
+          <label class="type-card">
+            <input type="radio" name="siteType" value="recruit" data-price="65000">
+            <div class="type-card-inner">
+              <div class="type-icon">&#x1F465;</div>
+              <h3 class="type-name">採用サイト</h3>
+              <p class="type-desc">採用・求人情報サイト</p>
+              <span class="type-price">¥65,000〜/ページ</span>
+            </div>
+          </label>
+          <label class="type-card">
+            <input type="radio" name="siteType" value="ec" data-price="80000">
+            <div class="type-card-inner">
+              <div class="type-icon">&#x1F6D2;</div>
+              <h3 class="type-name">ECサイト</h3>
+              <p class="type-desc">オンラインショップ・通販サイト</p>
+              <span class="type-price">¥80,000〜/ページ</span>
+            </div>
+          </label>
+          <label class="type-card">
+            <input type="radio" name="siteType" value="media" data-price="60000">
+            <div class="type-card-inner">
+              <div class="type-icon">&#x1F4F0;</div>
+              <h3 class="type-name">メディア・ブログ</h3>
+              <p class="type-desc">コンテンツメディア・ブログサイト</p>
+              <span class="type-price">¥60,000〜/ページ</span>
+            </div>
+          </label>
+        </div>
+      </section>
+
+      <!-- Step 2: ページ構成 -->
+      <section class="step-panel" id="step2">
+        <div class="step-header">
+          <h2 class="step-title">Step 2</h2>
+          <p class="step-description">必要なページを選択し、数量を指定してください</p>
+        </div>
+
+        <div class="page-category">
+          <h3 class="category-title">基本ページ</h3>
+          <div class="page-list" id="basicPages">
+            <!-- JS で生成 -->
+          </div>
+        </div>
+
+        <div class="page-category">
+          <h3 class="category-title">コンテンツページ</h3>
+          <div class="page-list" id="contentPages">
+            <!-- JS で生成 -->
+          </div>
+        </div>
+
+        <div class="page-category">
+          <h3 class="category-title">その他のページ</h3>
+          <div class="page-list" id="otherPages">
+            <!-- JS で生成 -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 3: 機能・エフェクト -->
+      <section class="step-panel" id="step3">
+        <div class="step-header">
+          <h2 class="step-title">Step 3</h2>
+          <p class="step-description">必要な機能・エフェクトを選択してください</p>
+        </div>
+        <div class="feature-list" id="featureList">
+          <!-- JS で生成 -->
+        </div>
+      </section>
+
+      <!-- Step 4: システム・設定 -->
+      <section class="step-panel" id="step4">
+        <div class="step-header">
+          <h2 class="step-title">Step 4</h2>
+          <p class="step-description">システム・設定オプションを選択してください</p>
+        </div>
+        <div class="feature-list" id="systemList">
+          <!-- JS で生成 -->
+        </div>
+      </section>
+    </main>
+
+    <!-- アクションバー -->
+    <div class="action-bar">
+      <div class="action-bar-inner">
+        <button class="btn btn-secondary" id="btnReset">リセット</button>
+        <div class="action-right">
+          <button class="btn btn-outline" id="btnCopy">テキストコピー</button>
+          <button class="btn btn-outline" id="btnPdf">PDF出力</button>
+          <button class="btn btn-prev" id="btnPrev" style="display:none;">前へ</button>
+          <button class="btn btn-primary" id="btnNext">次のステップへ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- コピー完了トースト -->
+  <div class="toast" id="toast">コピーしました</div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
