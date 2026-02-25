@@ -320,8 +320,14 @@
     });
 
     // 設定モーダル
-    document.getElementById("btnSettings").addEventListener("click", function () {
-      openSettings();
+    document.getElementById("btnSettings").addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        openSettings();
+      } catch (err) {
+        showToast("設定の読み込みに失敗しました");
+      }
     });
     document.getElementById("btnCloseSettings").addEventListener("click", function () {
       document.getElementById("settingsModal").classList.remove("open");
@@ -806,27 +812,7 @@
       });
     }
 
-    const html = `<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<title>御見積書 - ${estNo}</title>
-<style>
-  @page { size: A4; margin: 15mm; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: "Hiragino Kaku Gothic ProN","Noto Sans JP","Meiryo",sans-serif; color: #334155; background: #fff; padding: 40px; max-width: 800px; margin: 0 auto; }
-  @media print {
-    body { padding: 0; }
-    .no-print { display: none !important; }
-  }
-</style>
-</head>
-<body>
-<div class="no-print" style="text-align:center;margin-bottom:24px">
-  <button onclick="window.print()" style="background:#3eb2d2;color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit">PDF保存 / 印刷</button>
-</div>
-
-<!-- ヘッダー -->
+    const invoiceContent = `<!-- ヘッダー -->
 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px">
   <div>
     <h1 style="font-size:28px;font-weight:800;color:#1e3a5f;letter-spacing:0.08em">御 見 積 書</h1>
@@ -916,14 +902,39 @@
     ・上記金額は概算です。詳細なヒアリング後に正式見積書を発行いたします。<br>
     ・制作期間はご発注後、内容に応じて別途ご案内いたします。
   </p>
-</div>
+</div>`;
 
-</body>
-</html>`;
+    // 既存のPDFモーダルがあれば削除
+    var existingModal = document.getElementById("pdfModal");
+    if (existingModal) existingModal.remove();
 
-    const w = window.open("", "_blank");
-    w.document.write(html);
-    w.document.close();
+    // フルスクリーンモーダルで見積書を表示
+    var modal = document.createElement("div");
+    modal.id = "pdfModal";
+    modal.className = "pdf-modal-overlay";
+
+    var toolbar = document.createElement("div");
+    toolbar.className = "pdf-toolbar";
+    toolbar.innerHTML =
+      '<button class="pdf-toolbar-btn pdf-toolbar-print" id="pdfPrintBtn">PDF保存 / 印刷</button>' +
+      '<button class="pdf-toolbar-btn pdf-toolbar-close" id="pdfCloseBtn">閉じる</button>';
+
+    var pdfContent = document.createElement("div");
+    pdfContent.className = "pdf-content";
+    pdfContent.innerHTML = invoiceContent;
+
+    modal.appendChild(toolbar);
+    modal.appendChild(pdfContent);
+    document.body.appendChild(modal);
+    document.body.classList.add("pdf-printing");
+
+    document.getElementById("pdfPrintBtn").addEventListener("click", function () {
+      window.print();
+    });
+    document.getElementById("pdfCloseBtn").addEventListener("click", function () {
+      modal.remove();
+      document.body.classList.remove("pdf-printing");
+    });
   }
 
   // --- AI指示書プロンプト生成・ダウンロード ---
@@ -1077,16 +1088,31 @@
     lines.push("");
 
     const text = lines.join("\n");
-    const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `web-制作指示書_${d.siteTypeName}.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast("指示書をダウンロードしました");
+    try {
+      var blob = new Blob([text], { type: "application/octet-stream" });
+      var dlUrl = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = dlUrl;
+      a.download = "web-制作指示書_" + d.siteTypeName + ".md";
+      a.style.display = "none";
+      document.body.appendChild(a);
+      setTimeout(function () {
+        a.click();
+        setTimeout(function () {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(dlUrl);
+        }, 200);
+      }, 0);
+      showToast("指示書をダウンロードしました");
+    } catch (e) {
+      // フォールバック: 新しいウィンドウにテキスト表示
+      var w = window.open("", "_blank");
+      if (w) {
+        w.document.write("<pre style='white-space:pre-wrap;font-size:14px;padding:20px'>" + text.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</pre>");
+        w.document.close();
+      }
+      showToast("ブラウザでテキストを表示しました");
+    }
   }
 
   // --- トースト ---
